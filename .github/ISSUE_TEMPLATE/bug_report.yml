@@ -1,0 +1,29 @@
+name: BUG 反馈
+description: 报告绘图、文件、界面或安装问题
+title: "[BUG] "
+body:
+  - type: input
+    id: version
+    attributes:
+      label: NaDraw 与 Windows 版本
+      placeholder: 程序版本、官方安装或自行编译、Windows 版本
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: 重现步骤
+      description: 从空白画布开始，按顺序描述操作。
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: 预期行为与实际结果
+    validations:
+      required: true
+  - type: textarea
+    id: attachment
+    attributes:
+      label: 截图或最小示例
+      description: 提交前移除个人信息和未公开研究内容，请勿上传任何密钥。

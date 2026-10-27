@@ -1,0 +1,16 @@
+NaDraw
+Required Notice: Copyright (c) 2026 NaDraw project authors and contributors.
+
+NaDraw's original source code and original assets are made available under
+the PolyForm Noncommercial License 1.0.0. See LICENSE for the complete terms
+and LICENSE.zh-CN.md for a non-binding Chinese explanation.
+
+This is a source-available, noncommercial project, not an OSI-approved
+open-source release. Publishing the source does not grant commercial rights.
+
+Third-party components retain their own licenses and notices. The NaDraw
+license does not replace, restrict, or relicense those third-party terms.
+See THIRD_PARTY_NOTICES.md and src/licenses/.
+
+Official update verification keys are public. Private release-signing keys,
+hosting credentials, and personal data are not part of this distribution.

@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NaDraw</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="app-shell" id="app-shell" data-view="drawing">
+      <header class="app-titlebar">
+        <div class="brand-lockup"><img src="assets/nadraw-logo.svg" alt="NaDraw"><strong>NaDraw</strong><span>化学结构编辑器</span></div>
+        <div class="title-version"><span>Release</span><b>1.0.25</b></div>
+      </header>
+
+      <section class="commandbar" aria-label="应用命令">
+        <div class="menu-root"><button id="menu-button">☰ 菜单</button><div class="menu-panel" id="main-menu" hidden>
+          <button data-command="new">新建工程 <kbd>Ctrl+N</kbd></button><button data-command="open">打开工程… <kbd>Ctrl+O</kbd></button><button data-command="save">保存工程… <kbd>Ctrl+S</kbd></button><hr><button data-command="select-all">全选当前画布 <kbd>Ctrl+A</kbd></button><button data-command="copy">复制选中 <kbd>Ctrl+C</kbd></button><button data-command="cut">剪切选中 <kbd>Ctrl+X</kbd></button><button data-command="paste">粘贴 <kbd>Ctrl+V</kbd></button><hr><button data-command="delete-all">清空画布… <kbd>Ctrl+Shift+Delete</kbd></button><hr><button data-command="export-image">导出图片（JPG / SVG）… <kbd>Ctrl+E</kbd></button><button data-command="export-jpeg">直接导出 JPG…</button><button data-command="export-svg">直接导出 SVG 矢量图…</button>
+          <hr><button data-command="check-updates">检查更新… <span>1.0.25</span></button><button id="auto-update-toggle" role="menuitemcheckbox" aria-checked="true">自动检查更新 <span id="auto-update-value">已开启</span></button><p class="update-menu-status" id="update-menu-status">启动时及运行期间自动检查</p>
+        </div></div>
+        <span class="command-rule"></span>
+        <button class="command-icon" data-command="new" title="新建"><svg><use href="assets/chem-icons.svg#i-new"/></svg></button>
+        <button class="command-icon" data-command="open" title="打开"><svg><use href="assets/chem-icons.svg#i-open"/></svg></button>
+        <button class="command-icon" data-command="save" title="保存"><svg><use href="assets/chem-icons.svg#i-save"/></svg></button>
+        <span class="command-rule"></span>
+        <button class="command-icon" id="undo" title="撤销 Ctrl+Z"><svg><use href="assets/chem-icons.svg#i-undo"/></svg></button>
+        <button class="command-icon" id="redo" title="重做 Ctrl+Y"><svg><use href="assets/chem-icons.svg#i-redo"/></svg></button>
+        <button class="command-icon" id="eraser" title="删除选中"><svg><use href="assets/chem-icons.svg#i-eraser"/></svg></button>
+        <span class="command-rule"></span>
+        <label class="bond-length-control" title="标准化学键键长"><svg><use href="assets/chem-icons.svg#i-ruler"/></svg><span>键长</span><input id="bond-length" type="number" value="24" min="24" max="120" step="1"><small>px</small></label>
+        <button class="command-toggle" id="grid-toggle" title="显示网格"><svg><use href="assets/chem-icons.svg#i-grid"/></svg><span>网格</span></button>
+        <span class="command-rule"></span>
+        <label class="zoom-control"><svg><use href="assets/chem-icons.svg#i-zoom"/></svg><select id="zoom-select"><option value=".5">50%</option><option value=".75">75%</option><option value="1" selected>100%</option><option value="1.5">150%</option><option value="2">200%</option></select></label>
+        <button class="command-icon" id="zoom-out" title="缩小"><span>−</span></button><button class="command-icon" id="zoom-in" title="放大"><span>+</span></button>
+        <div class="command-spacer"></div>
+        <button id="tutorial-toggle" class="tutorial-command"><svg><use href="assets/chem-icons.svg#i-help"/></svg><span>使用教程</span></button>
+        <button id="assist-toggle" class="assist-command"><svg><use href="assets/chem-icons.svg#i-settings"/></svg><span>辅助功能</span><i>▾</i></button>
+        <button class="export-command" data-command="export-image">导出图片</button>
+      </section>
+
+      <aside class="tool-rail" id="tool-rail" aria-label="化学绘图工具">
+        <button class="rail-collapse" id="rail-collapse" title="折叠工具栏">‹</button>
+        <div class="tool-section"><span class="section-dot">编辑</span><div class="tool-grid">
+          <button class="tool active" data-tool="select" title="选择 / 框选 (Q)"><svg><use href="assets/chem-icons.svg#i-select"/></svg><b>选择</b></button>
+          <button class="tool" data-tool="pan" title="平移画布（空格）"><svg><use href="assets/chem-icons.svg#i-hand"/></svg><b>平移</b></button>
+        </div></div>
+        <div class="tool-section"><span class="section-dot">化学键</span><div class="tool-grid">
+          <button class="tool" data-tool="bond" data-order="1" title="单键 (1)"><svg><use href="assets/chem-icons.svg#i-single"/></svg><b>单键</b></button>
+          <button class="tool" data-tool="bond" data-order="2" title="双键 (2)：点击已有双键切换三种形态"><svg><use href="assets/chem-icons.svg#i-double"/></svg><b>双键</b></button>
+          <button class="tool" data-tool="bond" data-order="3" title="三键 (3)"><svg><use href="assets/chem-icons.svg#i-triple"/></svg><b>三键</b></button>
+          <button class="tool" data-tool="bond" data-style="wedge" title="实心楔形键"><svg><use href="assets/chem-icons.svg#i-wedge"/></svg><b>实楔</b></button>
+          <button class="tool" data-tool="bond" data-style="hollow" title="空心边框楔形键"><svg><use href="assets/chem-icons.svg#i-hollow-wedge"/></svg><b>空楔</b></button>
+          <button class="tool" data-tool="bond" data-style="hash" title="虚线楔形键"><svg><use href="assets/chem-icons.svg#i-hash"/></svg><b>虚楔</b></button>
+          <button class="tool" data-tool="chain" title="碳链"><svg><use href="assets/chem-icons.svg#i-chain"/></svg><b>碳链</b></button>
+        </div></div>
+        <div class="tool-section"><span class="section-dot">环与模板</span><div class="tool-grid">
+          <button class="tool" data-tool="template" data-template="benzene" title="苯环"><svg><use href="assets/chem-icons.svg#i-benzene"/></svg><b>苯环</b></button>
+          <button class="tool" data-tool="template" data-template="cyclopropane" title="环丙烷"><svg><use href="assets/chem-icons.svg#i-triangle"/></svg><b>环丙</b></button>
+          <button class="tool" data-tool="template" data-template="cyclobutane" title="环丁烷"><svg><use href="assets/chem-icons.svg#i-square"/></svg><b>环丁</b></button>
+          <button class="tool" data-tool="template" data-template="pentagon" title="环戊烷"><svg><use href="assets/chem-icons.svg#i-pentagon"/></svg><b>环戊</b></button>
+          <button class="tool" data-tool="template" data-template="hexagon" title="环己烷"><svg><use href="assets/chem-icons.svg#i-hexagon"/></svg><b>环己</b></button>
+          <button class="tool" data-tool="template" data-template="cycloheptane" title="环庚烷"><svg><use href="assets/chem-icons.svg#i-heptagon"/></svg><b>环庚</b></button>
+          <button class="tool" data-tool="template" data-template="cyclooctane" title="环辛烷"><svg><use href="assets/chem-icons.svg#i-octagon"/></svg><b>环辛</b></button>
+          <button class="tool" data-tool="template" data-template="chair-left" title="椅式结构"><svg><use href="assets/chem-icons.svg#i-chair-left"/></svg><b>左椅</b></button>
+          <button class="tool" data-tool="template" data-template="chair-right" title="镜像椅式结构"><svg><use href="assets/chem-icons.svg#i-chair-right"/></svg><b>右椅</b></button>
+          <button class="tool" data-tool="template" data-template="ethyl-acetate" title="乙酸乙酯键线式"><svg><use href="assets/chem-icons.svg#i-template"/></svg><b>乙酸乙酯</b></button>
+        </div></div>
+        <div class="tool-section"><span class="section-dot">机理与注释</span><div class="tool-grid">
+          <button class="tool" id="arrow-tool" data-tool="arrow" title="反应箭头"><svg><use href="assets/chem-icons.svg#i-arrow"/></svg><b>箭头</b></button>
+          <button class="tool" data-tool="charge" title="电荷标记"><svg><use href="assets/chem-icons.svg#i-charge"/></svg><b>电荷</b></button>
+          <button class="tool" data-tool="mark" title="圆点 / 叉号标记"><svg><use href="assets/chem-icons.svg#i-mark"/></svg><b>点位</b></button>
+          <button class="tool" data-tool="bracket" title="括号"><svg><use href="assets/chem-icons.svg#i-bracket"/></svg><b>括号</b></button>
+          <button class="tool" data-tool="text" title="普通文字"><svg><use href="assets/chem-icons.svg#i-text"/></svg><b>文字</b></button>
+        </div></div>
+      </aside>
+
+      <main class="drawing-stage" id="drawing-stage">
+        <div class="document-tabs" aria-label="绘图标签页"><div class="document-tab-list" id="document-tab-list"></div><button class="new-document" id="new-document" title="新建画布（Ctrl+N）">＋</button></div>
+        <canvas id="drawing-canvas" aria-label="无限化学结构画布"></canvas>
+        <div class="canvas-hint" id="canvas-hint">选择工具：点击对象选择，拖动框选；按住空格平移画布。</div>
+        <div class="canvas-toast" id="canvas-toast"></div>
+        <div class="context-menu" id="context-menu" hidden></div>
+        <section class="tutorial-overlay" id="tutorial-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="tutorial-title">
+          <div class="tutorial-window">
+            <header class="tutorial-header"><div><svg><use href="assets/chem-icons.svg#i-help"/></svg><span><strong id="tutorial-title">NaDraw 使用教程</strong><small>从第一根化学键到完整机理图</small></span></div><div class="tutorial-progress"><span id="tutorial-progress">1 / 10</span><button id="tutorial-close" title="关闭教程">×</button></div></header>
+            <div class="tutorial-layout">
+              <nav class="tutorial-nav" aria-label="教程章节">
+                <button class="active" data-tutorial-target="start"><b>01</b><span>快速开始</span></button>
+                <button data-tutorial-target="canvas"><b>02</b><span>画布与视图</span></button>
+                <button data-tutorial-target="select"><b>03</b><span>选择与编辑</span></button>
+                <button data-tutorial-target="bonds"><b>04</b><span>化学键与碳链</span></button>
+                <button data-tutorial-target="templates"><b>05</b><span>环与模板</span></button>
+                <button data-tutorial-target="mechanism"><b>06</b><span>箭头与标记</span></button>
+                <button data-tutorial-target="text"><b>07</b><span>括号与文字</span></button>
+                <button data-tutorial-target="elements"><b>08</b><span>元素与补氢</span></button>
+                <button data-tutorial-target="assist"><b>09</b><span>辅助功能</span></button>
+                <button data-tutorial-target="files"><b>10</b><span>文件与快捷键</span></button>
+              </nav>
+              <div class="tutorial-pages" id="tutorial-pages">
+                <article class="tutorial-page active" data-tutorial-page="start">
+                  <div class="tutorial-page-title"><span>01</span><div><h2>快速开始：画出第一张结构式</h2><p>先认识四个固定区域，再用四步完成最常用的绘图流程。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual ui-map"><svg viewBox="0 0 520 270" aria-label="NaDraw 界面区域示意图"><rect class="paper" x="18" y="18" width="484" height="234" rx="6"/><rect class="accent-soft" x="18" y="18" width="484" height="34"/><rect class="accent-soft" x="18" y="52" width="76" height="174"/><rect class="accent-soft" x="18" y="226" width="484" height="26"/><rect class="paper" x="94" y="52" width="408" height="174"/><text x="260" y="40">顶部命令栏：文件、键长、缩放、教程、辅助功能</text><text x="56" y="130" transform="rotate(-90 56 130)">左侧工具栏</text><text x="298" y="137" class="big">无限画布</text><path class="bond" d="M235 157l34-20 34 20 34-20"/><text x="260" y="245">底部状态栏：工具 / 辅助 / 缩放 / 坐标</text></svg><figcaption>画布缩放只改变绘图内容，工具栏和按钮不会跟着缩放。</figcaption></figure>
+                    <div class="tutorial-steps"><div><b>1</b><span><strong>选“单键”</strong>在左侧化学键组点击单键。</span></div><div><b>2</b><span><strong>按住左键拖动</strong>松开后生成固定键长的化学键。</span></div><div><b>3</b><span><strong>添加元素</strong>从右侧选择 O、N、Cl 等，再点击键端点。</span></div><div><b>4</b><span><strong>选择并保存</strong>按 <kbd>Q</kbd> 返回选择，按 <kbd>Ctrl+S</kbd> 保存为 .nad 工程。</span></div></div>
+                  </div>
+                  <div class="tutorial-tip"><strong>推荐习惯</strong><span>先画碳骨架，再添加元素、文字和机理箭头，最后用选择工具整体整理位置；点击左侧工具栏顶部的 ‹ / › 可以折叠或展开工具栏。</span></div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="canvas" hidden>
+                  <div class="tutorial-page-title"><span>02</span><div><h2>画布、平移、缩放与网格</h2><p>画布没有边界，所有视图操作都不会改变结构的真实比例。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="无限画布操作示意图"><defs><pattern id="t-grid" width="24" height="24" patternUnits="userSpaceOnUse"><path class="grid-line" d="M24 0H0V24"/></pattern></defs><rect x="18" y="18" width="484" height="234" fill="url(#t-grid)"/><path class="origin" d="M260 120v34m-17-17h34"/><circle class="accent" cx="260" cy="137" r="3"/><path class="bond" d="M187 154l36-21 36 21 36-21 36 21"/><path class="guide" d="M120 78h76m-12-9 12 9-12 9M400 202h-76m12-9-12 9 12 9"/><g transform="translate(390 68)"><circle class="paper" cx="0" cy="0" r="25"/><text class="big" x="0" y="7">＋</text></g><text x="260" y="239">鼠标坐标实时显示在底部状态栏</text></svg><figcaption>浅灰网格只用于视觉参考；原点十字和画布坐标始终按世界坐标计算。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>三种平移方法</h3><ul><li>选择左侧“平移”工具后拖动画布。</li><li>任何工具下按住 <kbd>Space</kbd> 再拖动。</li><li>在画布上按住鼠标右键拖动；短按右键仍打开对象菜单。</li></ul><h3>缩放与网格</h3><ul><li>滚动鼠标滚轮，或使用顶部 <b>− / ＋</b>。</li><li>缩放范围 25%–400%，键长和结构比例保持不变。</li><li>顶部“网格”按钮控制浅灰网格显示。</li><li>顶部键长输入框控制新建化学键和文字的基准尺寸。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="select" hidden>
+                  <div class="tutorial-page-title"><span>03</span><div><h2>独立选择、框选、移动、缩放与旋转</h2><p>每根键、每个原子标签和每个注释对象都可单独处理。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="选择框与旋转手柄示意图"><rect class="selection" x="110" y="55" width="300" height="155"/><path class="bond" d="M165 155l70-42 70 42 65-39"/><path class="selected-bond" d="M235 113l70 42"/><g class="handles"><rect x="106" y="51" width="8" height="8"/><rect x="256" y="51" width="8" height="8"/><rect x="406" y="51" width="8" height="8"/><rect x="106" y="128" width="8" height="8"/><rect x="406" y="128" width="8" height="8"/><rect x="106" y="206" width="8" height="8"/><rect x="256" y="206" width="8" height="8"/><rect x="406" y="206" width="8" height="8"/><circle cx="260" cy="26" r="8"/><path d="M260 34v17"/></g><text x="260" y="232">八点缩放 · 顶部圆形手柄旋转</text></svg><figcaption>红色线段表示只选中了当前化学键，不会因为一次点击就选中整个化合物。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>选择规则</h3><ul><li>按 <kbd>Q</kbd> 或点击“选择”。点击对象只选择当前对象。</li><li>从空白处拖出选择框；化学键必须<strong>完整落入</strong>框内才会入选。</li><li>按住 <kbd>Shift</kbd> 可继续加入对象。</li></ul><h3>编辑操作</h3><ul><li>拖动选中对象移动；四角或八个控制点缩放。</li><li>拖动顶部圆形手柄旋转。</li><li><kbd>Delete</kbd> 删除；<kbd>Ctrl+C</kbd> 复制；<kbd>Ctrl+X</kbd> 剪切；<kbd>Ctrl+V</kbd> 粘贴。</li><li><kbd>Ctrl+Z</kbd> 撤销，<kbd>Ctrl+Y</kbd> 重做。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="bonds" hidden>
+                  <div class="tutorial-page-title"><span>04</span><div><h2>化学键、键级循环与碳链</h2><p>所有键采用统一黑色线稿，并共享固定键长、角度辅助和价态检查。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="化学键类型示意图"><g transform="translate(38 38)"><path class="bond" d="M0 20h74"/><text x="37" y="48">单键</text><path class="bond" d="M108 16h74m-74 8h74"/><text x="145" y="48">双键</text><path class="bond" d="M216 12h74m-74 8h74m-74 8h74"/><text x="253" y="48">三键</text><path class="wedge" d="M324 22l76-15v30z"/><text x="362" y="48">实楔</text></g><g transform="translate(38 118)"><path class="hollow" d="M0 22l76-15v30z"/><text x="38" y="50">空楔</text><g class="hashes"><path d="M112 21v2m12-5v8m12-11v14m12-17v20m12-23v26"/></g><text x="137" y="50">虚楔</text><path class="bond" d="M215 30l42-24 42 24 42-24 42 24"/><path class="angle" d="M247 23a18 18 0 0 1 20 0"/><text x="299" y="58">碳链 120°</text></g><text class="accent-text" x="260" y="230">单键工具点击已有键：1 → 2 → 3 → 1 循环</text></svg><figcaption>双键工具点击双键主体：居中等长 → 一侧短线 → 另一侧短线；只改形态，不改变键数。新画双键仍按连接关系自动排布。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>绘制</h3><ul><li>单键、双键、三键：从起点拖到终点。</li><li>实心楔、空心楔、虚线楔用于立体化学；缩放时宽度随长度同步变化。</li><li>碳链工具拖动即可生成连续折线，内部夹角为 120°。</li></ul><h3>自动逻辑</h3><ul><li>“固定标准键长”开启时，新键使用顶部设定的键长。</li><li>“24方向角度辅助”开启时按 15° 对齐；箭头直线和折线也参与。</li><li>单键、三键工具点击已有键主体时保留键级累加。双键工具点击双键主体切换三种形态；点击单键或三键则直接改为双键。</li><li>价态超限时原子出现红色虚线框；模板生成的键同样参与计算。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="templates" hidden>
+                  <div class="tutorial-page-title"><span>05</span><div><h2>环结构与预制模板</h2><p>模板由真实原子和化学键组成，放置后可以继续逐键编辑。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="环和乙酸乙酯模板示意图"><g transform="translate(34 38)"><path class="bond" d="m36 0 31 18v36L36 72 5 54V18z"/><path class="bond thin" d="m13 22 23-13m23 13v26M36 63 13 50"/><text x="36" y="94">苯环</text></g><g transform="translate(145 38)"><path class="bond" d="M36 0 68 18 56 54H16L4 18z"/><text x="36" y="94">环戊</text></g><g transform="translate(258 42)"><path class="bond" d="M0 43 36 22l36 21 36-21 36 21"/><text x="72" y="92">环丙至环辛快捷模板</text></g><g transform="translate(62 164)"><circle class="accent" cx="0" cy="0" r="5"/><path class="bond" d="M0 0 42-24l42 24 42-24 42 24"/><text x="0" y="29" class="accent-text">点击锚点</text></g><g transform="translate(286 158)"><path class="bond" d="M0 18 34 0l34 18m-5-1V-24m10 41V-24m-5 42 34-18 34 18 34-18"/><text x="68" y="-28">O</text><text x="103" y="-2">O</text><text x="85" y="48">乙酸乙酯键线式</text></g></svg><figcaption>半透明模板跟随鼠标；点击位置对应模板最左侧键端点，而不是模板中心。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>模板种类</h3><ul><li>苯环：双键自动向环内侧绘制。</li><li>环丙、环丁、环戊、环己、环庚、环辛。</li><li>椅式和镜像椅式结构。</li><li>乙酸乙酯键线式。</li></ul><h3>使用方法</h3><ul><li>左键选择快捷模板；在模板工具上右键打开完整模板页。</li><li>移动鼠标先观察半透明预览，确认尺寸和锚点后单击。</li><li>放置后可单独选择任何一根键、原子或标签继续修改。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="mechanism" hidden>
+                  <div class="tutorial-page-title"><span>06</span><div><h2>机理箭头、电荷、过渡态与点位</h2><p>箭头由线型、路径和头部三个独立选项组合。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="箭头和标记示意图"><path class="bond" d="M42 48h122"/><path class="arrow-head" d="m164 48-13-8v16z"/><text x="103" y="76">实线全箭头</text><path class="bond dashed" d="M208 48h122"/><path class="arrow-head" d="m330 48-13-8v16z"/><text x="269" y="76">虚线</text><path class="bond" d="M374 48h92"/><path class="fishhook" d="M466 48q-12 1-18 13"/><text x="420" y="76">鱼钩头</text><path class="bond" d="M42 139q60-82 122 0"/><path class="arrow-head" d="m164 139-13-3 4-12z"/><text x="103" y="166">三点曲线</text><path class="bond" d="m208 143 42-50 42 50 42-50"/><path class="arrow-head" d="m334 93-7 14-9-10z"/><text x="271" y="166">连续折线</text><g transform="translate(398 123)"><text class="symbol" x="0" y="0">＋ − ⊕ ⊖ ‡</text><text class="symbol" x="5" y="48">● ×</text></g><text x="260" y="229">右键工具按钮可打开类型选择页 · 所有对象均可选择和删除</text></svg><figcaption>直线箭头拖动绘制；三点曲线依次点击三点；连续折线按 Enter 或双击结束。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>箭头</h3><ul><li>线型：普通实线、虚线。</li><li>路径：直线、三点确定曲线、连续多段直线。</li><li>头部：全箭头、鱼钩头。</li><li>箭头不参与旧式文本位置吸附，但文字移动到箭头中心时会出现蓝色对齐辅助线。</li></ul><h3>标记</h3><ul><li>电荷：正、负、带圈正、带圈负；靠近原子会附着到原子。</li><li>过渡态标记：‡。</li><li>点位：圆点或叉号，可在任意位置独立放置。</li><li>放置前均显示半透明预览；选择后可移动、缩放或删除。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="text" hidden>
+                  <div class="tutorial-page-title"><span>07</span><div><h2>括号和化学文字编辑</h2><p>括号按准确边界绘制；文字是可编辑对象，而不是不可修改的图片。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="括号和文字编辑示意图"><circle class="accent" cx="55" cy="43" r="5"/><circle class="accent" cx="205" cy="176" r="5"/><path class="guide" d="M55 43h150v133H55z"/><path class="bond" d="M92 132h-18V58h18m76 0h18v74h-18"/><text class="accent-text" x="55" y="30">起点：左上角</text><text class="accent-text" x="205" y="198">终点：右下角</text><g transform="translate(260 38)"><rect class="editor" x="0" y="0" width="220" height="138" rx="4"/><text x="14" y="25">文字编辑栏</text><rect class="input-box" x="14" y="38" width="192" height="38"/><text class="formula" x="24" y="66">CH₃COOCH₂CH₃</text><rect class="tool-chip" x="14" y="88" width="42" height="28"/><text x="35" y="107">X₂</text><rect class="tool-chip" x="64" y="88" width="42" height="28"/><text x="85" y="107">X²</text><rect class="color-chip" x="115" y="88" width="28" height="28"/><text x="158" y="107">字号 / 颜色</text></g><text class="formula big" x="360" y="218">Δ  δ  σ  ≠  ‡  ·  ⇌</text></svg><figcaption>文字靠近化学键端点或括号右上、右下时，原位置保留并显示吸附后虚影。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>括号</h3><ul><li>小括号、中括号、大括号；工具上右键选择类型。</li><li>手动画括号时，按下位置就是左上角，松开位置就是右下角。</li><li>先框选结构再使用括号，会自动按结构轮廓留出边距。</li></ul><h3>文字</h3><ul><li>先选择“文字”，再点击画布中的放置位置；画布会生成“请输入文字”文本框并自动打开编辑器。</li><li>支持换行、字号、颜色、上角标、下角标，以及希腊字母、反应符号和数学标记。</li><li>文字工具下点击已有文字，直接进入编辑；选择模式下右键文字也可编辑。</li><li>完成文字后默认回到选择；开启“批量添加文本”后可连续放置。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="elements" hidden>
+                  <div class="tutorial-page-title"><span>08</span><div><h2>元素标签与自动补氢</h2><p>元素标签使用可编辑的化学文本排版，氢的数量按当前键级计算。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="元素标签与补氢示意图"><path class="bond" d="M42 106 105 70l63 36"/><rect class="label-mask" x="91" y="52" width="29" height="36"/><text class="formula big" x="105" y="78">O</text><text x="105" y="136">元素覆盖节点并自动遮白键端</text><g transform="translate(220 28)"><rect class="periodic" x="0" y="0" width="38" height="38"/><text x="19" y="25">H</text><rect class="periodic" x="44" y="0" width="38" height="38"/><text x="63" y="25">C</text><rect class="periodic" x="88" y="0" width="38" height="38"/><text x="107" y="25">N</text><rect class="periodic" x="132" y="0" width="38" height="38"/><text x="151" y="25">O</text></g><text x="348" y="176" class="formula big">CH₃　CH₂　OH</text><text x="348" y="207">常见元素与自动补氢</text><text x="260" y="244">H、C、N、O、Cl、Br 快捷键 · 周期表提供更多元素</text></svg><figcaption>选择元素后点击键端点即可附着；氢的数量按价态自动计算，文字仍可继续编辑。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>元素</h3><ul><li>右侧快捷栏提供 H、C、N、O、Cl、Br；顶部小周期表按钮打开完整元素面板。</li><li>选中元素后点击化学键端点，标签会统一居中到节点。</li><li>“自动补全隐式氢”开启时按常见价态显示 CH₃、OH 等。</li><li>“元素标签遮挡处理”会在文字底部自动留白，避免键穿过文字。</li></ul></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="assist" hidden>
+                  <div class="tutorial-page-title"><span>09</span><div><h2>辅助功能：吸附、虚影、对齐与检查</h2><p>每项都能独立开关；关闭只影响之后的自动行为，不改动已画内容。</p></div></div>
+                  <div class="tutorial-grid wide-copy">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="吸附虚影与辅助线示意图"><g opacity=".35"><path class="bond" d="M50 78 96 52l46 26"/><text x="96" y="43">原位置</text></g><path class="ghost-shape" d="M154 78 200 52l46 26"/><circle class="accent" cx="246" cy="78" r="5"/><path class="guide-blue" d="M246 28v105"/><text class="accent-text" x="200" y="151">吸附后虚影：松开即落到此处</text><g transform="translate(34 188)"><path class="bond" d="M0 26 42 2"/><circle class="accent" cx="42" cy="2" r="5"/><g opacity=".35"><path class="bond" d="M118 26 76 2"/></g><path class="ghost-shape" d="M84 26 42 2"/><text x="58" y="58">两个基团端点合并</text></g><g transform="translate(296 58)"><path class="bond" d="M0 42h162"/><path class="arrow-head" d="m162 42-13-8v16z"/><text class="formula" x="81" y="30">Δ</text><path class="guide-blue" d="M81 3v80"/><text x="81" y="102">中心对齐辅助线</text></g></svg><figcaption>吸附判定出现时，原对象保持在鼠标位置，同时显示最终落点的半透明虚影。</figcaption></figure>
+                    <div class="assist-guide-list"><div><b>固定标准键长</b><span>新键统一使用顶部键长。</span></div><div><b>端点自动吸附</b><span>绘制键或移动独立基团时吸附、合并碳端点。</span></div><div><b>文本吸附</b><span>文字吸附到键端点和括号右上、右下。</span></div><div><b>自动对齐辅助线</b><span>对象中心对齐时显示蓝色虚线并轻微吸附。</span></div><div><b>批量添加文本</b><span>开启后完成文字仍保留文字工具。</span></div><div><b>24方向角度辅助</b><span>化学键与箭头按 15° 对齐。</span></div><div><b>自动补全隐式氢</b><span>按元素常见价态显示氢。</span></div><div><b>元素标签遮挡处理</b><span>文字居中并遮白底部化学键。</span></div><div><b>价态错误检查</b><span>超出常见价态时用红框警告。</span></div></div>
+                  </div>
+                </article>
+
+                <article class="tutorial-page" data-tutorial-page="files" hidden>
+                  <div class="tutorial-page-title"><span>10</span><div><h2>工程文件、图片导出与快捷键</h2><p>保存 .nad 用于继续编辑；导出 JPG 或 SVG 用于论文、作业和演示。</p></div></div>
+                  <div class="tutorial-grid">
+                    <figure class="tutorial-visual"><svg viewBox="0 0 520 270" aria-label="文件与导出类型选择示意图"><g transform="translate(30 53)"><path class="file-shape" d="M0 0h76l24 24v116H0z"/><path class="file-shape" d="M76 0v24h24"/><text class="big" x="50" y="70">.nad</text><text x="50" y="99">可再次编辑</text></g><path class="guide" d="M149 122h50m-13-9 13 9-13 9"/><g transform="translate(220 31)"><rect class="image-frame" x="0" y="0" width="270" height="174" rx="4"/><text x="18" y="26" text-anchor="start">另存为</text><rect class="input-box" x="18" y="39" width="234" height="31"/><text x="29" y="60" text-anchor="start">未命名1.jpg</text><text x="18" y="96" text-anchor="start">保存类型</text><rect class="input-box" x="18" y="106" width="234" height="35"/><text class="big" x="117" y="130">JPG 图片 / SVG 矢量图</text><path class="accent" d="m235 119-7-5h14z"/><rect class="tool-chip" x="165" y="148" width="87" height="22"/><text x="208" y="163">保存</text></g><text x="260" y="234">在保存窗口底部的“保存类型”中切换 JPG 或 SVG</text></svg><figcaption>.nad 是可编辑工程；JPG 是常用位图；SVG 放大不模糊，适合论文排版和后期编辑。</figcaption></figure>
+                    <div class="tutorial-copy"><h3>如何切换导出类型</h3><ul><li>点击顶部“导出图片”或按 <kbd>Ctrl+E</kbd>。</li><li>在 Windows 保存窗口底部找到<strong>“保存类型”</strong>，选择“JPG 图片”或“SVG 矢量图”，再点击保存。</li><li>也可打开左上角“菜单”，直接点击“直接导出 JPG”或“直接导出 SVG 矢量图”。</li><li><strong>JPG</strong>兼容性好，适合聊天、作业和普通文档；<strong>SVG</strong>放大不模糊，适合论文、印刷和矢量编辑。</li><li>两种格式都会按已画内容自动裁边，只在四周保留少量留白，不导出网格、选框和预览虚影。</li></ul><h3>常用快捷键</h3><div class="shortcut-grid"><span><kbd>Ctrl+S</kbd> 保存 .nad</span><span><kbd>Ctrl+E</kbd> 选择格式导出</span><span><kbd>Ctrl+O</kbd> 打开工程</span><span><kbd>Ctrl+N</kbd> 新建工程</span><span><kbd>Ctrl+A</kbd> 全选当前画布</span><span><kbd>Ctrl+C / X / V</kbd> 复制剪切粘贴</span><span><kbd>Delete</kbd> 删除选中</span><span><kbd>Ctrl+Z / Y</kbd> 撤销重做</span><span><kbd>Q / T</kbd> 选择 / 文字</span></div></div>
+                  </div>
+                  <div class="tutorial-tip"><strong>自动更新</strong><span>在左上角“菜单”中可使用“检查更新”或开关“自动检查更新”。默认在启动时和运行期间检查，下载完成后在菜单显示状态，退出程序后安装。若有未保存的工程，退出前会提醒；更新成功后的首次启动会弹窗显示版本和更新内容。检查或下载失败时仍可继续离线绘图。</span></div>
+                  <div class="tutorial-tip finish"><strong>已经学完</strong><span>实际绘制时随时点击顶部“使用教程”返回任意章节；教程不会修改当前画布。</span></div>
+                </article>
+              </div>
+            </div>
+            <footer class="tutorial-footer"><span>可用左侧章节快速跳转，按 Esc 关闭</span><div><button id="tutorial-prev">上一步</button><button id="tutorial-next" class="primary">下一步</button></div></footer>
+          </div>
+        </section>
+        <section class="assist-panel" id="assist-panel" hidden aria-label="辅助功能开关">
+          <header><div><svg><use href="assets/chem-icons.svg#i-settings"/></svg><strong>辅助功能</strong></div><button id="assist-close">×</button></header>
+          <p>每项均可独立关闭；关闭后仅取消对应自动行为，不会改变已绘制结构。</p>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-ruler"/></svg><b>固定标准键长</b><small>新键统一使用当前键长</small></span><input type="checkbox" data-assist="fixedLength" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-magnet"/></svg><b>端点自动吸附</b><small>靠近原子节点即连接</small></span><input type="checkbox" data-assist="snapAtoms" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-text"/></svg><b>文本吸附</b><small>吸附到键端点和括号右上、右下</small></span><input type="checkbox" data-assist="textSnap" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-layout"/></svg><b>自动对齐辅助线</b><small>移动对象时显示中心对齐虚线并轻微吸附</small></span><input type="checkbox" data-assist="smartGuides" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-text"/></svg><b>批量添加文本</b><small>完成一个文字后继续保留文字工具</small></span><input type="checkbox" data-assist="batchText"><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-layout"/></svg><b>24方向角度辅助</b><small>按 15° 标准方向绘制</small></span><input type="checkbox" data-assist="snapAngles" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-hydrogen"/></svg><b>自动补全隐式氢</b><small>按原子价态显示 CH₃、OH 等</small></span><input type="checkbox" data-assist="implicitHydrogens" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-text"/></svg><b>元素标签遮挡处理</b><small>标签居中覆盖节点，并自动遮白键端</small></span><input type="checkbox" data-assist="labelAvoidance" checked><i></i></label>
+          <label class="switch-row"><span><svg><use href="assets/chem-icons.svg#i-charge"/></svg><b>价态错误检查</b><small>超出常见价态时红框提示</small></span><input type="checkbox" data-assist="valenceCheck" checked><i></i></label>
+        </section>
+        <section class="popup-card arrow-popover" id="arrow-popover" hidden><header><strong>箭头组合</strong><button data-close-popup="arrow-popover">×</button></header><div class="arrow-builder"><div class="arrow-option-row" aria-label="线型"><button data-arrow-line="solid" class="active" title="实线" aria-label="实线"><svg viewBox="0 0 52 30"><path d="M5 15h42"/></svg></button><button data-arrow-line="dashed" title="虚线" aria-label="虚线"><svg viewBox="0 0 52 30"><path d="M5 15h42" stroke-dasharray="7 5"/></svg></button></div><div class="arrow-option-row arrow-path-row" aria-label="绘制模式"><button data-arrow-mode="straight" class="active" title="直线" aria-label="直线"><svg viewBox="0 0 52 30"><path d="M5 23L46 7"/><circle cx="5" cy="23" r="2"/><circle cx="46" cy="7" r="2"/></svg></button><button data-arrow-mode="curve" title="三点确定曲线" aria-label="三点确定曲线"><svg viewBox="0 0 52 30"><path d="M5 23Q25 0 47 21"/><circle cx="5" cy="23" r="2"/><circle cx="25" cy="6" r="2"/><circle cx="47" cy="21" r="2"/></svg></button><button data-arrow-mode="polyline" title="连续多段直线" aria-label="连续多段直线"><svg viewBox="0 0 52 30"><path d="M4 23L18 8l14 13L48 6"/><circle cx="4" cy="23" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="32" cy="21" r="2"/><circle cx="48" cy="6" r="2"/></svg></button></div><div class="arrow-option-row" aria-label="箭头头部"><button data-arrow-head="full" class="active" title="全箭头" aria-label="全箭头"><svg viewBox="0 0 52 30"><path d="M5 15h35"/><path class="filled" d="M47 15l-10-6v12z"/></svg></button><button data-arrow-head="fishhook" title="鱼钩头" aria-label="鱼钩头"><svg viewBox="0 0 52 30"><path d="M5 15h37M47 15q-7 1-10 7"/></svg></button></div></div><p class="panel-note">曲线依次点击 3 个点；多段直线双击或按 Enter 完成。</p></section>
+        <section class="popup-card template-popover" id="template-popover" hidden><header><strong>结构模板</strong><button data-close-popup="template-popover">×</button></header><div class="choice-grid visual-choice-grid paged-options" data-page-size="9"><button data-template-choice="benzene" title="苯环" aria-label="苯环"><svg><use href="assets/chem-icons.svg#i-benzene"/></svg></button><button data-template-choice="cyclopropane" title="环丙烷" aria-label="环丙烷"><svg><use href="assets/chem-icons.svg#i-triangle"/></svg></button><button data-template-choice="cyclobutane" title="环丁烷" aria-label="环丁烷"><svg><use href="assets/chem-icons.svg#i-square"/></svg></button><button data-template-choice="pentagon" title="环戊烷" aria-label="环戊烷"><svg><use href="assets/chem-icons.svg#i-pentagon"/></svg></button><button data-template-choice="hexagon" title="环己烷" aria-label="环己烷"><svg><use href="assets/chem-icons.svg#i-hexagon"/></svg></button><button data-template-choice="cycloheptane" title="环庚烷" aria-label="环庚烷"><svg><use href="assets/chem-icons.svg#i-heptagon"/></svg></button><button data-template-choice="cyclooctane" title="环辛烷" aria-label="环辛烷"><svg><use href="assets/chem-icons.svg#i-octagon"/></svg></button><button data-template-choice="chair-left" title="椅式" aria-label="椅式"><svg><use href="assets/chem-icons.svg#i-chair-left"/></svg></button><button data-template-choice="chair-right" title="镜像椅式" aria-label="镜像椅式"><svg><use href="assets/chem-icons.svg#i-chair-right"/></svg></button><button data-template-choice="ethyl-acetate" title="乙酸乙酯键线式" aria-label="乙酸乙酯键线式"><svg><use href="assets/chem-icons.svg#i-template"/></svg></button></div><footer class="choice-pager"><button data-page-prev title="上一页">‹</button><span data-page-label>1 / 1</span><button data-page-next title="下一页">›</button></footer></section>
+        <section class="popup-card charge-popover" id="charge-popover" hidden><header><strong>电荷与过渡态</strong><button data-close-popup="charge-popover">×</button></header><div class="choice-grid visual-choice-grid paged-options" data-page-size="6"><button data-charge="plus" title="正电" aria-label="正电"><span>+</span></button><button data-charge="minus" title="负电" aria-label="负电"><span>−</span></button><button data-charge="circled-plus" title="带圈正电" aria-label="带圈正电"><span>⊕</span></button><button data-charge="circled-minus" title="带圈负电" aria-label="带圈负电"><span>⊖</span></button><button data-charge="transition" title="过渡态" aria-label="过渡态"><span>‡</span></button></div><footer class="choice-pager"><button data-page-prev title="上一页">‹</button><span data-page-label>1 / 1</span><button data-page-next title="下一页">›</button></footer></section>
+        <section class="popup-card bracket-popover" id="bracket-popover" hidden><header><strong>括号图形</strong><button data-close-popup="bracket-popover">×</button></header><div class="choice-grid visual-choice-grid paged-options" data-page-size="6"><button data-bracket="round" title="小括号" aria-label="小括号"><span>( )</span></button><button data-bracket="square" title="中括号" aria-label="中括号"><span>[ ]</span></button><button data-bracket="curly" title="大括号" aria-label="大括号"><span>{ }</span></button></div><footer class="choice-pager"><button data-page-prev title="上一页">‹</button><span data-page-label>1 / 1</span><button data-page-next title="下一页">›</button></footer></section>
+        <section class="popup-card mark-popover" id="mark-popover" hidden><header><strong>点位图形</strong><button data-close-popup="mark-popover">×</button></header><div class="choice-grid visual-choice-grid paged-options" data-page-size="6"><button data-mark="dot" title="圆点" aria-label="圆点"><span>●</span></button><button data-mark="cross" title="叉号" aria-label="叉号"><span>×</span></button></div><footer class="choice-pager"><button data-page-prev title="上一页">‹</button><span data-page-label>1 / 1</span><button data-page-next title="下一页">›</button></footer></section>
+        <section class="popup-card text-popover" id="text-popover" hidden><header><strong id="text-editor-title">文字格式</strong><button data-close-popup="text-popover">×</button></header><label class="text-content-label">内容<textarea id="text-input" rows="2" autocomplete="off" spellcheck="false" placeholder="请输入文字">请输入文字</textarea></label><div class="text-format-row"><button class="format-button" data-text-format="subscript" title="将选中文字设为下角标">X₂</button><button class="format-button" data-text-format="superscript" title="将选中文字设为上角标">X²</button><label>字号<input id="font-size" type="number" value="14" min="10" max="64"></label><label>颜色<input id="font-color" type="color" value="#111111"></label></div><div class="symbol-groups" aria-label="常用特殊符号表"><strong>希腊字母</strong><div class="symbol-keyboard"><button data-symbol="α">α</button><button data-symbol="β">β</button><button data-symbol="γ">γ</button><button data-symbol="δ">δ</button><button data-symbol="Δ">Δ</button><button data-symbol="ε">ε</button><button data-symbol="η">η</button><button data-symbol="θ">θ</button><button data-symbol="λ">λ</button><button data-symbol="μ">μ</button><button data-symbol="ν">ν</button><button data-symbol="π">π</button><button data-symbol="ρ">ρ</button><button data-symbol="σ">σ</button><button data-symbol="Σ">Σ</button><button data-symbol="τ">τ</button><button data-symbol="φ">φ</button><button data-symbol="χ">χ</button><button data-symbol="ψ">ψ</button><button data-symbol="ω">ω</button></div><strong>反应与常用标记</strong><div class="symbol-keyboard"><button data-symbol="→">→</button><button data-symbol="←">←</button><button data-symbol="↔">↔</button><button data-symbol="⇌">⇌</button><button data-symbol="±">±</button><button data-symbol="∓">∓</button><button data-symbol="≠">≠</button><button data-symbol="≈">≈</button><button data-symbol="≤">≤</button><button data-symbol="≥">≥</button><button data-symbol="°">°</button><button data-symbol="·">·</button><button data-symbol="•">•</button><button data-symbol="‡">‡</button><button data-symbol="†">†</button><button data-symbol="∞">∞</button><button data-symbol="−">−</button><button data-symbol="—">—</button><button data-symbol="、">、</button><button data-symbol="×">×</button></div></div><p>可直接换行，或选中文字设置上下角标；特殊符号会插入到当前光标位置。移动文字靠近键端点或括号右上、右下时会显示吸附虚影。</p><button class="text-done" id="text-done">完成</button></section>
+        <section class="periodic-panel" id="periodic-panel" hidden><header><strong>元素周期表</strong><button id="periodic-close">×</button></header><div class="periodic-grid" id="periodic-grid"></div><footer>选择元素后，点击原子端点即可替换元素并按价态自动标注。</footer></section>
+      </main>
+
+      <aside class="element-rail" aria-label="常用元素">
+        <button class="element-tool" id="periodic-open" title="元素周期表"><svg><use href="assets/chem-icons.svg#i-periodic"/></svg></button>
+        <button class="element-tool" data-element="H" title="氢 H">H</button><button class="element-tool active-element" data-element="C" title="碳 C">C</button><button class="element-tool" data-element="N" title="氮 N">N</button><button class="element-tool" data-element="O" title="氧 O">O</button><button class="element-tool" data-element="Cl" title="氯 Cl">Cl</button><button class="element-tool" data-element="Br" title="溴 Br">Br</button>
+      </aside>
+      <footer class="statusbar"><span id="status-tool">工具：选择</span><span class="status-rule"></span><span id="status-assist">辅助：键长 / 吸附 / 补氢 已开启</span><span class="status-flex"></span><span id="status-zoom">100%</span><span class="status-rule"></span><span id="status-coord">坐标：0, 0</span></footer>
+    </div>
+    <script src="native-bridge.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>
