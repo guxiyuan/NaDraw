@@ -25,7 +25,7 @@ class Handler(SimpleHTTPRequestHandler):
             value['signature'] = ('A' if signature[0] != 'A' else 'B') + signature[1:]
             body = json.dumps(value).encode()
         elif self.path == '/truncated.exe':
-            body = (root / 'nadraw/releases/NaDraw-Setup-1.0.25.exe').read_bytes()[:1000]
+            body = (root / 'nadraw/releases/NaDraw-Setup-1.0.28.exe').read_bytes()[:1000]
         else:
             return super().do_GET()
         self.send_response(200)

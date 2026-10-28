@@ -1,10 +1,10 @@
-param([string]$OutputPath)
+﻿param([string]$OutputPath)
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path -Parent $PSScriptRoot
 $version=[IO.File]::ReadAllText((Join-Path $projectRoot 'VERSION')).Trim()
 if(!$OutputPath){$OutputPath=Join-Path $projectRoot ('dist\NaDraw-Source-'+$version+'-noncommercial.zip')}
 $OutputPath=[IO.Path]::GetFullPath($OutputPath)
-$rootFiles=@('.gitignore','README.md','VERSION','release-notes.txt','LICENSE','NOTICE','LICENSE.zh-CN.md','THIRD_PARTY_NOTICES.md','CONTRIBUTING.md','SECURITY.md','CHANGELOG.md')
+$rootFiles=@('.gitignore','README.md','VERSION','release-notes.txt','LICENSE','NOTICE','LICENSE.zh-CN.md','THIRD_PARTY_NOTICES.md','CONTRIBUTING.md','SECURITY.md','CHANGELOG.md','宣传页/index.html','宣传页/使用说明.txt')
 $sourceFolders=@('src','scripts','tests','docs','.github')
 $files=@()
 foreach($name in $rootFiles){$files+=Get-Item -LiteralPath (Join-Path $projectRoot $name)}

@@ -20,7 +20,7 @@ namespace fs = std::filesystem;
 
 constexpr wchar_t kWindowClass[] = L"NaDrawNativeWindow";
 constexpr wchar_t kWindowTitle[] = L"NaDraw";
-constexpr wchar_t kVersion[] = L"1.0.25";
+constexpr wchar_t kVersion[] = L"1.0.28";
 constexpr int kIconId = 101;
 
 HWND g_window = nullptr;
@@ -203,7 +203,7 @@ void HandleBridgeMessage(const std::wstring& message) {
   const std::string payload = DecodeBase64(message.substr(second + 1));
 
   if (action == L"get-update-settings") {
-    SendResponse(id, std::wstring(L"{\"enabled\":")+(nadraw_update::AutoEnabled()?L"true":L"false")+L",\"available\":"+(nadraw_update::kOfficialBuild?L"true":L"false")+L",\"version\":\"1.0.25\"}");
+    SendResponse(id, std::wstring(L"{\"enabled\":")+(nadraw_update::AutoEnabled()?L"true":L"false")+L",\"available\":"+(nadraw_update::kOfficialBuild?L"true":L"false")+L",\"version\":\"1.0.28\"}");
     return;
   }
   if (action == L"set-auto-updates") {
@@ -414,12 +414,12 @@ void InitializeWebView() {
                         const changed=await window.nadraw.setAutoUpdates(!originalSettings.enabled);
                         const readBack=await window.nadraw.getUpdateSettings();
                         result.officialBuild=originalSettings.available;
-                        result.updateSettings=typeof originalSettings.available==='boolean'&&typeof originalSettings.enabled==='boolean'&&originalSettings.version==='1.0.25'&&
+                        result.updateSettings=typeof originalSettings.available==='boolean'&&typeof originalSettings.enabled==='boolean'&&originalSettings.version==='1.0.28'&&
                           (originalSettings.available?changed.enabled===!originalSettings.enabled&&readBack.enabled===changed.enabled:!originalSettings.enabled&&!changed.enabled&&!readBack.enabled);
                       } finally { await window.nadraw.setAutoUpdates(originalSettings.enabled); }
                       result.closeProtection=window.__nadrawSmoke.checkCloseProtection();
                       result.updateMenu=Boolean(document.getElementById('auto-update-toggle')&&document.querySelector('[data-command="check-updates"]'));
-                      result.success = result.version === '1.0.25' && Object.values(result.core).every(Boolean) && result.nativeIo && result.doubleBondFileRoundTrip && result.updateSettings && result.closeProtection && result.updateMenu;
+                      result.success = result.version === '1.0.28' && Object.values(result.core).every(Boolean) && result.nativeIo && result.doubleBondFileRoundTrip && result.updateSettings && result.closeProtection && result.updateMenu;
                     } catch(error) { result.error=String(error); result.success=false; }
                     const json = JSON.stringify(result);
                     const bytes = new TextEncoder().encode(json);

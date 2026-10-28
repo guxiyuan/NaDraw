@@ -23,7 +23,7 @@
 
 namespace nadraw_update {
 namespace fs = std::filesystem;
-inline constexpr wchar_t kVersion[] = L"1.0.25";
+inline constexpr wchar_t kVersion[] = L"1.0.28";
 inline constexpr bool kOfficialBuild = NADRAW_OFFICIAL_BUILD != 0;
 inline constexpr wchar_t kManifestUrl[] = L"http://atlas1020.vxni.ink/nadraw/latest.json";
 inline fs::path dataDirectoryOverride;
@@ -107,7 +107,7 @@ inline std::string Download(const std::wstring& url,size_t limit) {
   ValidateUpdateUrl(url);URL_COMPONENTS parts{sizeof(parts)};parts.dwHostNameLength=parts.dwUrlPathLength=parts.dwExtraInfoLength=static_cast<DWORD>(-1);if(!WinHttpCrackUrl(url.c_str(),0,0,&parts))throw std::runtime_error("URL");
   const std::wstring host(parts.lpszHostName,parts.dwHostNameLength);
   const std::wstring path=(parts.dwUrlPathLength?std::wstring(parts.lpszUrlPath,parts.dwUrlPathLength):L"/")+(parts.dwExtraInfoLength?std::wstring(parts.lpszExtraInfo,parts.dwExtraInfoLength):L"");
-  Internet session(WinHttpOpen(L"NaDraw/1.0.25",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));WinHttpSetTimeouts(session,8000,8000,15000,15000);DWORD protocols=WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;WinHttpSetOption(session,WINHTTP_OPTION_SECURE_PROTOCOLS,&protocols,sizeof(protocols));Internet connection(WinHttpConnect(session,host.c_str(),parts.nPort,0));
+  Internet session(WinHttpOpen(L"NaDraw/1.0.28",WINHTTP_ACCESS_TYPE_AUTOMATIC_PROXY,WINHTTP_NO_PROXY_NAME,WINHTTP_NO_PROXY_BYPASS,0));WinHttpSetTimeouts(session,8000,8000,15000,15000);DWORD protocols=WINHTTP_FLAG_SECURE_PROTOCOL_TLS1_2;WinHttpSetOption(session,WINHTTP_OPTION_SECURE_PROTOCOLS,&protocols,sizeof(protocols));Internet connection(WinHttpConnect(session,host.c_str(),parts.nPort,0));
   const DWORD flags=WINHTTP_FLAG_REFRESH|(parts.nScheme==INTERNET_SCHEME_HTTPS?WINHTTP_FLAG_SECURE:0);
   Internet request(WinHttpOpenRequest(connection,L"GET",path.c_str(),nullptr,WINHTTP_NO_REFERER,WINHTTP_DEFAULT_ACCEPT_TYPES,flags));DWORD policy=WINHTTP_OPTION_REDIRECT_POLICY_NEVER;WinHttpSetOption(request,WINHTTP_OPTION_REDIRECT_POLICY,&policy,sizeof(policy));
   if(!WinHttpSendRequest(request,L"Cache-Control: no-cache\r\n",static_cast<DWORD>(-1),WINHTTP_NO_REQUEST_DATA,0,0,0)||!WinHttpReceiveResponse(request,nullptr))throw std::runtime_error("连接失败，请检查网络或更新服务器地址");DWORD status=0,size=sizeof(status);if(!WinHttpQueryHeaders(request,WINHTTP_QUERY_STATUS_CODE|WINHTTP_QUERY_FLAG_NUMBER,nullptr,&status,&size,nullptr)||status!=200)throw std::runtime_error("更新服务器暂不可用（HTTP "+std::to_string(status)+")");

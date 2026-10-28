@@ -1,22 +1,23 @@
-param(
+﻿param(
  [string]$ToolchainBin=(Join-Path $env:LOCALAPPDATA 'NaDrawBuildTools\llvm-mingw-20261020\llvm-mingw-20261020-ucrt-x86_64\bin'),
  [string]$InstallerPath,[string]$HelperPath,[string]$ManifestPath,[string]$ServerRoot,[string]$ReportPath,
  [string]$SigningKeyPath=(Join-Path $env:LOCALAPPDATA 'NaDrawBuildTools\signing\NaDraw-update-private.xml')
 )
 $ErrorActionPreference='Stop'
 $projectRoot=Split-Path -Parent $PSScriptRoot
+$releaseVersion=[IO.File]::ReadAllText((Join-Path $projectRoot 'VERSION')).Trim()
 Set-Location -LiteralPath $projectRoot
 $testRoot=Join-Path $projectRoot ('build\update-test-'+[guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $testRoot | Out-Null
-if(!$InstallerPath){$InstallerPath=Join-Path $projectRoot 'dist\NaDraw-Setup-1.0.25.exe'}
+if(!$InstallerPath){$InstallerPath=Join-Path $projectRoot ('dist\NaDraw-Setup-'+$releaseVersion+'.exe')}
 if(!$ServerRoot){$ServerRoot=Join-Path $projectRoot 'server-deploy\wwwroot'}
 if(!$ManifestPath){$ManifestPath=Join-Path $ServerRoot 'nadraw\latest.json'}
 if(!$HelperPath){$HelperPath=Join-Path $projectRoot 'build\official\app\NaDrawUpdater.exe'}
 if(!$ReportPath){$ReportPath=Join-Path $projectRoot 'dist\update-verification.json'}
 $installer=[IO.Path]::GetFullPath($InstallerPath);$manifest=[IO.Path]::GetFullPath($ManifestPath);$helper=[IO.Path]::GetFullPath($HelperPath)
-$oldInstaller=Join-Path $projectRoot 'dist\NaDraw-Setup-1.0.2.exe'
-if(!(Test-Path -LiteralPath $oldInstaller)){ $oldInstaller=Join-Path $env:LOCALAPPDATA 'NaDrawBuildTools\verified-build-1.0.2-http-20261027\NaDraw-Setup-1.0.2.exe' }
-if(!(Test-Path -LiteralPath $oldInstaller)){throw '需要已验证的 1.0.2 安装包进行真实升级测试'}
+$oldInstaller=Join-Path $projectRoot 'dist\NaDraw-Setup-1.0.27.exe'
+
+if(!(Test-Path -LiteralPath $oldInstaller)){throw '需要已验证的 1.0.27 安装包进行真实升级测试'}
 $rsa=[Security.Cryptography.RSA]::Create()
 $rsa.FromXmlString([IO.File]::ReadAllText($SigningKeyPath))
 $envelope=[IO.File]::ReadAllText($manifest) | ConvertFrom-Json
@@ -74,23 +75,23 @@ Write-Output 'LOCKED_INSTALLATION_PRESERVED'
 Run-Program $installer @('--silent','--update','--test-install','--test-fail-after','3','--dir',('"'+$installed+'"')) 1
 Assert-Unchanged $before $installed
 Write-Output 'PARTIAL_REPLACEMENT_ROLLED_BACK'
-Run-Program $helper @('--manifest',('"'+$manifest+'"'),'--package',('"'+$installer+'"'),'--current','1.0.25') 1
-Run-Program $helper @('--manifest',('"'+$manifest+'"'),'--package',('"'+$installer+'"'),'--current','1.0.26') 1
+Run-Program $helper @('--manifest',('"'+$manifest+'"'),'--package',('"'+$installer+'"'),'--current',$releaseVersion) 1
+Run-Program $helper @('--manifest',('"'+$manifest+'"'),'--package',('"'+$installer+'"'),'--current','1.0.29') 1
 Write-Output 'SAME_VERSION_AND_DOWNGRADE_REJECTED'
 $testManifest=Join-Path $testRoot 'pending.json';$testPackage=Join-Path $testRoot 'package.exe'
 Copy-Item -LiteralPath $manifest -Destination $testManifest
 Copy-Item -LiteralPath $installer -Destination $testPackage
 Run-Program $helper @('--apply','--test','--manifest',('"'+$testManifest+'"'),'--package',('"'+$testPackage+'"'),'--install-dir',('"'+$installed+'"'))
-if((Get-Item -LiteralPath (Join-Path $installed 'NaDraw.exe')).VersionInfo.ProductVersion -ne '1.0.25'){throw '安装后的版本不正确'}
+if((Get-Item -LiteralPath (Join-Path $installed 'NaDraw.exe')).VersionInfo.ProductVersion -ne $releaseVersion){throw '安装后的版本不正确'}
 if([IO.File]::ReadAllText((Join-Path $installed '用户工程.nad')) -ne 'USER_PROJECT_MUST_REMAIN'){throw '用户工程文件被更改'}
 foreach($obsolete in @('web\assets\orbital-atlas.png','web\assets\arrow-atlas.png')){if(Test-Path -LiteralPath (Join-Path $installed $obsolete)){throw '旧版参考图集未从升级安装中移除'}}
 $completion=[IO.File]::ReadAllText((Join-Path $testRoot 'update-complete.json'))|ConvertFrom-Json
-if($completion.version -ne '1.0.25' -or $completion.from -ne '1.0.2'){throw '更新完成提醒数据不正确'}
+if($completion.version -ne $releaseVersion -or $completion.from -ne '1.0.27'){throw '更新完成提醒数据不正确'}
 if((Test-Path -LiteralPath $testManifest) -or (Test-Path -LiteralPath $testPackage)){throw '已应用的更新缓存未清理'}
 Run-Program (Join-Path $installed 'NaDraw.exe') @('--smoke-test')
 $report=[IO.File]::ReadAllText((Join-Path $testRoot 'qa-native\report.json'))|ConvertFrom-Json
 if(!$report.success){throw '升级后的绘图或文件功能异常'}
-$result=[ordered]@{version='1.0.25';transport='http';httpDownload=$true;securityValidation=$true;lockedFilePreserved=$true;rollback=$true;downgradeRejected=$true;upgradeFrom='1.0.2';upgradeTo='1.0.25';userProjectPreserved=$true;completionMarker=$true;upgradedAppChecks=$report.success;testDirectory=$testRoot}
+$result=[ordered]@{version=$releaseVersion;transport='http';httpDownload=$true;securityValidation=$true;lockedFilePreserved=$true;rollback=$true;downgradeRejected=$true;upgradeFrom='1.0.27';upgradeTo=$releaseVersion;userProjectPreserved=$true;completionMarker=$true;upgradedAppChecks=$report.success;testDirectory=$testRoot}
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent ([IO.Path]::GetFullPath($ReportPath))) | Out-Null
 [IO.File]::WriteAllText([IO.Path]::GetFullPath($ReportPath),($result|ConvertTo-Json -Depth 5),[Text.UTF8Encoding]::new($false))
-Write-Output 'REAL_1_0_2_TO_1_0_25_UPGRADE_PASSED'
+Write-Output 'REAL_1_0_27_TO_1_0_28_UPGRADE_PASSED'

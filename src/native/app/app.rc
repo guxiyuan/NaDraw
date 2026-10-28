@@ -3,8 +3,8 @@
 101 ICON "../../web/assets/nadraw-icon.ico"
 1 RT_MANIFEST "app.manifest"
 1 VERSIONINFO
- FILEVERSION 1,0,25,0
- PRODUCTVERSION 1,0,25,0
+ FILEVERSION 1,0,28,0
+ PRODUCTVERSION 1,0,28,0
  FILEOS VOS_NT_WINDOWS32
  FILETYPE VFT_APP
 BEGIN
@@ -14,11 +14,11 @@ BEGIN
   BEGIN
    VALUE "CompanyName", "NaDraw"
    VALUE "FileDescription", "NaDraw 化学结构编辑器"
-   VALUE "FileVersion", "1.0.25"
+   VALUE "FileVersion", "1.0.28"
    VALUE "InternalName", "NaDraw"
    VALUE "OriginalFilename", "NaDraw.exe"
    VALUE "ProductName", "NaDraw"
-   VALUE "ProductVersion", "1.0.25"
+   VALUE "ProductVersion", "1.0.28"
   END
  END
  BLOCK "VarFileInfo"

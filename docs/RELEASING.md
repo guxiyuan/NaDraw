@@ -2,7 +2,7 @@
 
 ## 本次整理的状态
 
-当前 VERSION 仍为 1.0.25，但源码包含移除轨道和构建分离等准备工作。源码仓库为 https://github.com/guxiyuan/NaDraw 。本次源码发布不替换此前生成的官方 1.0.25 安装包或服务器包。下一次正式发布须使用新的版本号，不能以相同版本号悄悄替换线上功能；相同版本不会被已安装客户端作为更新接受。
+当前 VERSION 为 1.0.28，正式构建包含此前整理的轨道移除、非商业许可和构建分离。源码仓库为 https://github.com/guxiyuan/NaDraw 。本地构建不会自动修改线上文件或公开仓库；此前的 1.0.25 安装包和服务器归档保留原样。后续正式发布须使用新的版本号，相同版本不会被已安装客户端作为更新接受。
 
 ## 首次公开 GitHub
 
@@ -11,7 +11,7 @@
 3. 解压源码包，检查 README、src、scripts、tests、docs、.github 与许可证。不要上传整个工作目录中的 build 或 dist；.gitignore 是补充保护，不是凭据检查的替代。
 4. 建立 GitHub 仓库，上传这些源码文件，确认内容后设为公开。本项目仓库为 https://github.com/guxiyuan/NaDraw 。
 5. 为正式安装包对应的源码提交建立版本标签，再创建 Release，附安装包、校验文件和更新内容。整理中的源码快照不应冒充已发布旧包的精确源码。
-6. 网站提供下载、源码、教程、反馈和自愿支持入口。未创建爱发电账号前不填写假链接，源码公开不要求必须开通赞助。
+6. 网站提供下载、源码、教程、反馈和自愿支持入口。爱发电主页为 https://afdian.com/a/fecl3 ，赞助自愿。
 
 ## 修改正式版本
 
@@ -43,7 +43,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build.ps1 -OfficialR
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build.ps1 -OfficialRelease -SkipPublish -OutputDirectory build/validation-official
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test.ps1 -InstallerPath build/validation-official/NaDraw-Setup-1.0.25.exe -ReportPath dist/preparation/official-functions.json
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts/test.ps1 -InstallerPath build/validation-official/NaDraw-Setup-1.0.28.exe -ReportPath dist/preparation/official-functions.json
 ```
 
 以上版本名随 VERSION 改动。`-SkipPublish` 不自动签发清单，也不覆盖 dist 中既有正式包。

@@ -10,7 +10,7 @@ int wmain(int count,wchar_t** arguments){
   const std::wstring base=arguments[1];
   if(base.rfind(L"http://127.0.0.1:",0)!=0)throw std::runtime_error("test server must be local");
   const auto manifest=u::VerifyManifest(u::Download(base+L"/nadraw/latest.json",128*1024));
-  const auto bytes=u::Download(base+L"/nadraw/releases/NaDraw-Setup-1.0.25.exe",manifest.size);
+  const auto bytes=u::Download(base+L"/nadraw/releases/NaDraw-Setup-1.0.28.exe",manifest.size);
   Check(bytes.size()==manifest.size&&u::Hex(u::Hash(bytes))==manifest.sha256,"HTTP release download with real signature and package hash");
   Reject([&]{u::Download(base+L"/missing",1024);},"HTTP 404 rejected");
   Reject([&]{u::Download(base+L"/redirect",1024);},"HTTP redirects rejected");

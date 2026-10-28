@@ -1,0 +1,15 @@
+NaDraw 宣传页使用说明
+
+将 index.html 上传到你网站的目标目录即可，也可以在电脑上用浏览器直接打开。页面的 CSS、脚本、Logo 和软件界面图片都已内嵌，无需其他文件、插件或外部字体。
+
+所有下载按钮均指向：
+http://atlas1020.vxni.ink/nadraw/releases/NaDraw-Setup-1.0.28.exe
+文件：NaDraw-Setup-1.0.28.exe
+点击后由服务器直接提供安装包。
+
+首次部署推荐上传 dist 中的 NaDraw-Website-and-Updates-1.0.28.zip，解压到域名绑定的 wwwroot 目录。
+整合包同时提供首页、nadraw/latest.json 和 nadraw/releases/NaDraw-Setup-1.0.28.exe，网页下载与软件自动更新使用同一个安装包。
+
+爱发电入口：https://afdian.com/a/fecl3（顶部导航、源码介绍区和页脚）。
+
+页面预览.png 仅用于查看效果，不需要上传。当前未上传到网站或 GitHub。

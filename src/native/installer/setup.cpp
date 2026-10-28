@@ -25,7 +25,7 @@
 #endif
 
 namespace fs = std::filesystem;
-constexpr wchar_t kVersion[] = L"1.0.25";
+constexpr wchar_t kVersion[] = L"1.0.28";
 constexpr wchar_t kClass[] = L"NaDrawSetupWindow";
 constexpr wchar_t kUninstallKey[] = L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\NaDraw";
 constexpr UINT kBeginInstall = WM_APP + 1;
@@ -219,7 +219,7 @@ void Install() {
     if(!EnsureRuntime(staging/L"new"/L"WebView2Loader.dll"))throw std::runtime_error("runtime missing");
     fs::copy_file(g_executablePath,staging/L"new"/L"Uninstall.exe");
     entries.push_back({L"Uninstall.exe",{}});
-    if(g_testInstall){std::ofstream(staging/L"new"/L"NaDraw.test-install")<<"1.0.25";entries.push_back({L"NaDraw.test-install",{}});}
+    if(g_testInstall){std::ofstream(staging/L"new"/L"NaDraw.test-install")<<"1.0.28";entries.push_back({L"NaDraw.test-install",{}});}
     for(const auto& entry:entries){
       const auto target=root/entry.relative;
       for(auto parent=target.parent_path();parent!=root.root_path();parent=parent.parent_path()){
@@ -333,7 +333,7 @@ void BeginInstall() {
     Install();
     g_complete = true;
     ShowWindow(g_launch, SW_SHOW);
-    SetWindowTextW(g_status, L"NaDraw 1.0.25 已安装完成，可以开始绘图。\n以后可从桌面或开始菜单打开。工程文件使用 .nad 格式。");
+    SetWindowTextW(g_status, L"NaDraw 1.0.28 已安装完成，可以开始绘图。\n以后可从桌面或开始菜单打开。工程文件使用 .nad 格式。");
     SetWindowTextW(g_primary, L"完成");
   } catch (...) {
     MessageBoxW(g_window, L"安装未完成。请确认安装目录可以写入，并关闭正在运行的 NaDraw。\n如果提示缺少 WebView2，请连接网络后重试。", L"NaDraw 安装", MB_ICONERROR);
@@ -412,9 +412,9 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   g_font = CreateFontW(-16,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH,L"Microsoft YaHei UI");
   g_titleFont = CreateFontW(-27,0,0,0,FW_SEMIBOLD,FALSE,FALSE,FALSE,DEFAULT_CHARSET,OUT_DEFAULT_PRECIS,CLIP_DEFAULT_PRECIS,CLEARTYPE_QUALITY,DEFAULT_PITCH,L"Microsoft YaHei UI");
   WNDCLASSEXW cls{sizeof(cls)}; cls.lpfnWndProc=Procedure; cls.hInstance=instance; cls.hIcon=LoadIconW(instance,MAKEINTRESOURCEW(101)); cls.hIconSm=cls.hIcon; cls.hCursor=LoadCursorW(nullptr,IDC_ARROW); cls.hbrBackground=GetSysColorBrush(COLOR_WINDOW); cls.lpszClassName=kClass; RegisterClassExW(&cls);
-  g_window=CreateWindowExW(0,kClass,L"NaDraw 1.0.25 安装向导",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,700,480,nullptr,nullptr,instance,nullptr);
+  g_window=CreateWindowExW(0,kClass,L"NaDraw 1.0.28 安装向导",WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,CW_USEDEFAULT,CW_USEDEFAULT,700,480,nullptr,nullptr,instance,nullptr);
   HWND icon=Control(L"STATIC",L"",SS_ICON,28,24,48,48); SendMessageW(icon,STM_SETICON,reinterpret_cast<WPARAM>(LoadIconW(instance,MAKEINTRESOURCEW(101))),0);
-  HWND title=Control(L"STATIC",L"安装 NaDraw 1.0.25",0,92,23,540,40); SendMessageW(title,WM_SETFONT,reinterpret_cast<WPARAM>(g_titleFont),TRUE);
+  HWND title=Control(L"STATIC",L"安装 NaDraw 1.0.28",0,92,23,540,40); SendMessageW(title,WM_SETFONT,reinterpret_cast<WPARAM>(g_titleFont),TRUE);
   Control(L"STATIC",L"化学结构与机理图绘制工具",0,94,64,520,26);
   Control(L"STATIC",L"请选择安装位置，点击“安装”完成设置。\n本程序使用系统 WebView2 运行时，安装后可离线使用。",0,28,120,628,54);
   Control(L"STATIC",L"安装位置",0,28,194,620,24);
@@ -422,7 +422,7 @@ int WINAPI wWinMain(HINSTANCE instance, HINSTANCE, PWSTR, int show) {
   Control(L"BUTTON",L"浏览…",WS_TABSTOP,578,224,82,30,kBrowse);
   g_desktop=Control(L"BUTTON",L"创建桌面快捷方式",BS_AUTOCHECKBOX|WS_TABSTOP,28,270,400,28,kDesktop); SendMessageW(g_desktop,BM_SETCHECK,BST_CHECKED,0);
   g_launch=Control(L"BUTTON",L"启动 NaDraw",BS_AUTOCHECKBOX|WS_TABSTOP,28,304,400,28,kLaunch); SendMessageW(g_launch,BM_SETCHECK,BST_CHECKED,0); ShowWindow(g_launch,SW_HIDE);
-  g_status=Control(L"STATIC",NADRAW_OFFICIAL_BUILD?L"1.0.25 正式版 · Windows 10/11 64 位":L"1.0.25 源码构建 · 非商业使用 · Windows 10/11 64 位",0,28,339,628,48);
+  g_status=Control(L"STATIC",NADRAW_OFFICIAL_BUILD?L"1.0.28 正式版 · Windows 10/11 64 位":L"1.0.28 源码构建 · 非商业使用 · Windows 10/11 64 位",0,28,339,628,48);
   g_primary=Control(L"BUTTON",L"安装",BS_DEFPUSHBUTTON|WS_TABSTOP,454,397,98,32,kInstall);
   g_cancel=Control(L"BUTTON",L"取消",WS_TABSTOP,564,397,96,32,kCancel);
   ShowWindow(g_window,show); UpdateWindow(g_window);
